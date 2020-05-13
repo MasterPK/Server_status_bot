@@ -13,7 +13,6 @@ public class Main {
         JDABuilder jdaBuilder = JDABuilder.createDefault("NzEwMDk1MzI4MTQ1MDQ3Njcy.XrwCcQ.DrqMVkIvaScDIthn1FApYWoL-_c");
 
         jdaBuilder.addEventListeners(new ServerStatus());
-
         try {
             jdaBuilder.build();
         } catch (LoginException e) {

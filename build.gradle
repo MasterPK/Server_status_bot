@@ -1,4 +1,7 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+
 plugins {
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'java'
 }
 
@@ -17,4 +20,13 @@ dependencies {
     compile 'net.dv8tion:JDA:4.1.1_149'
 }
 
-task stage(dependsOn: ['build'])
+jar {
+    manifest {
+        attributes(
+                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': 'Main'
+        )
+    }
+}
+
+task stage(dependsOn: ['shadowJar'])
