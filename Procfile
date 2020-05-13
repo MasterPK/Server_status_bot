@@ -1,0 +1,1 @@
+worker: java -jar build/libs/Server_status_bot-0.1a.jar
