@@ -68,34 +68,38 @@ public class ServerStatus extends ListenerAdapter {
         if (textChannels.isEmpty()) {
             return;
         }
-        TextChannel textChannel = textChannels.get(0);
-
-        String lastMessageId;
-        try {
-            lastMessageId = textChannel.getHistory().retrievePast(1).complete().get(0).getId();
-        } catch (Exception e) {
-            System.err.println("server-status: Channel has no messages!");
-            return;
-        }
-
-        String messageId = textChannel.getLatestMessageId();
-        Message message = textChannel.getHistory().retrievePast(1).complete().get(0);
-
-        String test = "Aktualni stav serveru: " + (status ? "Online" : "Offline");
-
-        if(message==null)
+        for(TextChannel textChannel:textChannels)
         {
-            textChannel.sendMessage(test).queue();
-            return;
+            String lastMessageId;
+            try {
+                lastMessageId = textChannel.getHistory().retrievePast(1).complete().get(0).getId();
+            } catch (Exception e) {
+                System.err.println("server-status: Channel has no messages!");
+                return;
+            }
+
+            String messageId = textChannel.getLatestMessageId();
+            Message message = textChannel.getHistory().retrievePast(1).complete().get(0);
+
+            String test = "Aktualni stav serveru: " + (status ? "Online" : "Offline");
+
+            if(message==null)
+            {
+                textChannel.sendMessage(test).queue();
+                return;
+            }
+
+            if(message.getContentDisplay().contains("Aktualni"))
+            {
+                MessageAction messageAction = textChannel.editMessageById(lastMessageId, test);
+                messageAction.queue();
+            }else {
+                textChannel.sendMessage(test).queue();
+            }
         }
 
-        if(message.getContentDisplay().contains("Aktualni"))
-        {
-            MessageAction messageAction = textChannel.editMessageById(lastMessageId, test);
-            messageAction.queue();
-        }else {
-            textChannel.sendMessage(test).queue();
-        }
+
+
     }
 
     /**
