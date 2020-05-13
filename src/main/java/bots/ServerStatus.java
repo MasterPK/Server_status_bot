@@ -79,7 +79,7 @@ public class ServerStatus extends ListenerAdapter {
         }
 
         String messageId = textChannel.getLatestMessageId();
-        Message message = textChannel.getHistory().getMessageById(messageId);
+        Message message = textChannel.getHistory().retrievePast(1).complete().get(0);
 
         String test = "Aktualni stav serveru: " + (status ? "Online" : "Offline");
 
