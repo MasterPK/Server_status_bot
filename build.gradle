@@ -28,5 +28,9 @@ jar {
         )
     }
 }
+task runJar(type: JavaExec) {
+    main = "-jar";
+    args shadowJar.archivePath
+}
 
 task stage(dependsOn: ['shadowJar'])
