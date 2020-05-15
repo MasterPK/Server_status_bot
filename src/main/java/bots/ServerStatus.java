@@ -60,7 +60,12 @@ public class ServerStatus extends ListenerAdapter {
      */
     private synchronized void updateStatus() {
 
-        McServerStats mcServerStats = new McServerStats("178.63.23.23", 28061);
+        McServerStats mcServerStats;
+        try {
+            mcServerStats = new McServerStats("178.63.23.23", 28061);
+        } catch (Exception ignored) {
+            return;
+        }
 
         List<TextChannel> textChannels = api.getTextChannelsByName("server-status", true);
 
@@ -81,6 +86,7 @@ public class ServerStatus extends ListenerAdapter {
             StringBuilder resultMessage = new StringBuilder();
             resultMessage.append("Aktualni stav serveru: ").append(mcServerStats.isOnline() ? "Online" : "Offline").append("\n");
             resultMessage.append("Aktualni pocet hracu: ").append(mcServerStats.getOnlinePlayersCount()).append("/").append(mcServerStats.getMaxPlayersCount()).append("\n");
+            resultMessage.append("Odezva serveru: ").append(mcServerStats.getLatency()).append(" ms").append("\n");
             resultMessage.append("Verze serveru: ").append(mcServerStats.getVersion());
             if (mcServerStats.getOnlinePlayersCount() > 0) {
                 resultMessage.append("\n\nAktualne pripojeni uzivatele:");

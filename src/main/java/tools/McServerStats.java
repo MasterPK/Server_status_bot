@@ -21,7 +21,9 @@ public class McServerStats {
 
     private int serverPort;
 
-    private JSONObject jsonServerInfo;
+    private JSONObject xdefconApi;
+
+    private JSONObject minetoolsApi;
 
     private long playersCount;
 
@@ -33,9 +35,11 @@ public class McServerStats {
 
     private long maxPlayerCount;
 
+    private double latency;
+
 
     public String getValue(String key) throws Exception {
-        String returnData = (String) jsonServerInfo.get(key);
+        String returnData = (String) xdefconApi.get(key);
         if (returnData != null) {
             return returnData;
         } else {
@@ -44,24 +48,35 @@ public class McServerStats {
     }
 
     public McServerStats(String address, int port) {
-        this.serverAddress=address;
-        this.serverPort=port;
+        this.serverAddress = address;
+        this.serverPort = port;
         update();
     }
 
-    private void update(){
+    private void update() {
 
         String serverInfo = doHttpRequest("https://mcapi.xdefcon.com/server/" + this.serverAddress + ":" + this.serverPort + "/full/json/");
 
-        if(serverInfo==null)
-        {
-            System.err.println("Error while requesting API!");
+        if (serverInfo == null) {
+            System.err.println("Error while requesting xdefcon.com API!");
             return;
         }
 
         JSONParser jsonParser = new JSONParser();
         try {
-            this.jsonServerInfo = (JSONObject) jsonParser.parse(serverInfo);
+            this.xdefconApi = (JSONObject) jsonParser.parse(serverInfo);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        serverInfo = doHttpRequest("https://api.minetools.eu/ping/" + this.serverAddress + "/" + this.serverPort);
+
+        if (serverInfo == null) {
+            System.err.println("Error while requesting minetools.eu API!");
+            return;
+        }
+        try {
+            this.minetoolsApi = (JSONObject) jsonParser.parse(serverInfo);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -71,37 +86,36 @@ public class McServerStats {
         this.setPlayersList();
         this.setPlayersCount();
         this.setMaxPlayersCount();
+        this.setLatency();
     }
 
-    private void setOnline()
-    {
-        this.online = this.jsonServerInfo.get("serverStatus").equals("online");
+    public long getLatency() {
+        return Math.round(latency);
     }
 
-    private void setVersion()
-    {
-        this.serverInfo = (String) this.jsonServerInfo.get("version");
+    private void setLatency() {
+        this.latency=(double) this.minetoolsApi.get("latency");
+    }
+
+    private void setOnline() {
+        this.online = this.xdefconApi.get("serverStatus").equals("online");
+    }
+
+    private void setVersion() {
+        this.serverInfo = (String) this.xdefconApi.get("version");
     }
 
     private void setPlayersCount() {
-        this.playersCount = (long) this.jsonServerInfo.get("players");
+        this.playersCount = (long) this.xdefconApi.get("players");
     }
 
     private void setPlayersList() {
         this.playersList = new ArrayList<>();
 
-        JSONParser jsonParser = new JSONParser();
-        JSONObject playersJson = new JSONObject();
-        try {
-            playersJson = (JSONObject)jsonParser.parse(doHttpRequest(" https://api.mcsrvstat.us/2/" + this.serverAddress + ":" + this.serverPort));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        JSONArray onlinePlayers = (JSONArray) ((JSONObject)playersJson.get("players")).get("list");
+        JSONArray onlinePlayers = (JSONArray) ((JSONObject) this.minetoolsApi.get("players")).get("sample");
 
         for (Object player : onlinePlayers) {
-            this.playersList.add(player.toString());
+            this.playersList.add((String) ((JSONObject) player).get("name"));
         }
 
     }
@@ -122,23 +136,19 @@ public class McServerStats {
         return this.online;
     }
 
-    private void setMaxPlayersCount()
-    {
-        this.maxPlayerCount=(long) this.jsonServerInfo.get("maxplayers");
+    private void setMaxPlayersCount() {
+        this.maxPlayerCount = (long) this.xdefconApi.get("maxplayers");
     }
 
-    public long getMaxPlayersCount()
-    {
+    public long getMaxPlayersCount() {
         return this.maxPlayerCount;
     }
 
-    public void updateData()
-    {
+    public void updateData() {
         this.update();
     }
 
-    private String doHttpRequest(String address)
-    {
+    private String doHttpRequest(String address) {
         URL url;
         try {
             url = new URL(address);
