@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import tools.MineStat;
 
 import javax.annotation.Nonnull;
 import javax.xml.soap.Text;
@@ -62,7 +63,8 @@ public class ServerStatus extends ListenerAdapter {
      */
     private void updateStatus() {
 
-        boolean status = pingHost("178.63.23.23", 28061, 5000);
+        MineStat mineStat = new MineStat("178.63.23.23", 28061);
+
         List<TextChannel> textChannels = api.getTextChannelsByName("server-status", true);
 
         if (textChannels.isEmpty()) {
@@ -81,7 +83,8 @@ public class ServerStatus extends ListenerAdapter {
             String messageId = textChannel.getLatestMessageId();
             Message message = textChannel.getHistory().retrievePast(1).complete().get(0);
 
-            String test = "Aktualni stav serveru: " + (status ? "Online" : "Offline");
+            String test = "Aktualni stav serveru: " + (mineStat.isServerUp() ? "Online" : "Offline") + "\n" +
+                    "Aktualni pocet hracu: " + mineStat.getCurrentPlayers() + "/" + mineStat.getMaximumPlayers();
 
             if(message==null)
             {
