@@ -52,13 +52,13 @@ public class ServerStatus extends ListenerAdapter {
     public void onReady(@Nonnull ReadyEvent event) {
         this.api = event.getJDA();
         Timer timer = new Timer("1");
-        timer.schedule(updateTask, 0, 60000);
+        timer.schedule(updateTask, 0, 10000);
     }
 
     /**
      * Update status in channel "server-status".
      */
-    private void updateStatus() {
+    private synchronized void updateStatus() {
 
         McServerStats mcServerStats = new McServerStats("178.63.23.23", 28061);
 
