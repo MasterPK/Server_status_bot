@@ -118,13 +118,8 @@ public class ServerStatus extends ListenerAdapter {
                 textChannel.sendMessage(resultMessage).queue();
                 return;
             }
-
-            if (message.getContentDisplay().contains("Aktualni")) {
-                MessageAction messageAction = textChannel.editMessageById(lastMessageId, resultMessage);
-                messageAction.queue();
-            } else {
-                textChannel.sendMessage(resultMessage).queue();
-            }
+            MessageAction messageAction = textChannel.editMessageById(lastMessageId, resultMessage);
+            messageAction.queue();
         }
     }
 
