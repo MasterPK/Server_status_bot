@@ -83,11 +83,11 @@ public class ServerStatus extends ListenerAdapter {
             resultMessage.append("Aktualni pocet hracu: ").append(mcServerStats.getOnlinePlayersCount()).append("/").append(mcServerStats.getMaxPlayersCount()).append("\n");
             resultMessage.append("Verze serveru: ").append(mcServerStats.getVersion());
             if (mcServerStats.getOnlinePlayersCount() > 0) {
-                resultMessage.append("\n\nAktualne pripojeni uzivatele:\n");
+                resultMessage.append("\n\nAktualne pripojeni uzivatele:");
             }
 
             for (String user : mcServerStats.getOnlinePlayers()) {
-                resultMessage.append(user);
+                resultMessage.append("\n").append(user);
             }
 
             if (message == null) {
