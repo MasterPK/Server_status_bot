@@ -60,6 +60,19 @@ public class ServerStatus extends ListenerAdapter {
      */
     private synchronized void updateStatus() {
 
+        List<TextChannel> textChannels = api.getTextChannelsByName("server-status", true);
+
+        if (textChannels.isEmpty()) {
+            return;
+        }
+
+        if(!pingHost("178.63.23.23", 28061, 5000)){
+            for (TextChannel textChannel : textChannels) {
+                textChannel.sendMessage("Server je momentalne nedostupny.\nPokud je server nedostupny delsi dobu, kontaktujte, prosím, majitele.").queue();
+            }
+            return;
+        }
+
         McServerStats mcServerStats;
         try {
             mcServerStats = new McServerStats("178.63.23.23", 28061);
@@ -67,11 +80,7 @@ public class ServerStatus extends ListenerAdapter {
             return;
         }
 
-        List<TextChannel> textChannels = api.getTextChannelsByName("server-status", true);
 
-        if (textChannels.isEmpty()) {
-            return;
-        }
         for (TextChannel textChannel : textChannels) {
             String lastMessageId;
             try {
