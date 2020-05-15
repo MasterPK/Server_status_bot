@@ -1,30 +1,25 @@
 package bots;
 
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.exceptions.ContextException;
-import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import tools.MineStat;
+import tools.McServerStats;
 
 import javax.annotation.Nonnull;
-import javax.xml.soap.Text;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 /**
  * Class that showing server status every minute.
+ *
  * @author Petr Křehlík
  */
 public class ServerStatus extends ListenerAdapter {
@@ -35,6 +30,7 @@ public class ServerStatus extends ListenerAdapter {
 
     /**
      * Show immediately server status everywhere on server if user write "!server-status"
+     *
      * @param event Event from API.
      */
     @Override
@@ -49,6 +45,7 @@ public class ServerStatus extends ListenerAdapter {
     /**
      * Initialize object.
      * When API is ready starts 1 minute timer to update data.
+     *
      * @param event
      */
     @Override
@@ -63,15 +60,14 @@ public class ServerStatus extends ListenerAdapter {
      */
     private void updateStatus() {
 
-        MineStat mineStat = new MineStat("178.63.23.23", 28061);
+        McServerStats mcServerStats = new McServerStats("178.63.23.23", 28061);
 
         List<TextChannel> textChannels = api.getTextChannelsByName("server-status", true);
 
         if (textChannels.isEmpty()) {
             return;
         }
-        for(TextChannel textChannel:textChannels)
-        {
+        for (TextChannel textChannel : textChannels) {
             String lastMessageId;
             try {
                 lastMessageId = textChannel.getHistory().retrievePast(1).complete().get(0).getId();
@@ -80,30 +76,32 @@ public class ServerStatus extends ListenerAdapter {
                 return;
             }
 
-            String messageId = textChannel.getLatestMessageId();
             Message message = textChannel.getHistory().retrievePast(1).complete().get(0);
 
-            String test = "Aktualni stav serveru: " + (mineStat.isServerUp() ? "Online" : "Offline") + "\n" +
-                    "Aktualni pocet hracu: " + mineStat.getCurrentPlayers() + "/" + mineStat.getMaximumPlayers() + "\n" +
-                    "Verze serveru: " + mineStat.getVersion();
+            StringBuilder resultMessage = new StringBuilder();
+            resultMessage.append("Aktualni stav serveru: ").append(mcServerStats.isOnline() ? "Online" : "Offline").append("\n");
+            resultMessage.append("Aktualni pocet hracu: ").append(mcServerStats.getOnlinePlayersCount()).append("/").append(mcServerStats.getMaxPlayersCount()).append("\n");
+            resultMessage.append("Verze serveru: ").append(mcServerStats.getVersion());
+            if (mcServerStats.getOnlinePlayersCount() > 0) {
+                resultMessage.append("\n\nAktualne pripojeni uzivatele:\n");
+            }
 
-            if(message==null)
-            {
-                textChannel.sendMessage(test).queue();
+            for (String user : mcServerStats.getOnlinePlayers()) {
+                resultMessage.append(user);
+            }
+
+            if (message == null) {
+                textChannel.sendMessage(resultMessage).queue();
                 return;
             }
 
-            if(message.getContentDisplay().contains("Aktualni"))
-            {
-                MessageAction messageAction = textChannel.editMessageById(lastMessageId, test);
+            if (message.getContentDisplay().contains("Aktualni")) {
+                MessageAction messageAction = textChannel.editMessageById(lastMessageId, resultMessage);
                 messageAction.queue();
-            }else {
-                textChannel.sendMessage(test).queue();
+            } else {
+                textChannel.sendMessage(resultMessage).queue();
             }
         }
-
-
-
     }
 
     /**
@@ -118,8 +116,9 @@ public class ServerStatus extends ListenerAdapter {
 
     /**
      * Ping IP and port.
-     * @param host IP to ping.
-     * @param port Port to ping.
+     *
+     * @param host    IP to ping.
+     * @param port    Port to ping.
      * @param timeout Timeout in ms.
      * @return Return true if ping succeed. False if no response in timeout.
      */
