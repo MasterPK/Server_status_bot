@@ -52,7 +52,7 @@ public class ServerStatus extends ListenerAdapter {
     public void onReady(@Nonnull ReadyEvent event) {
         this.api = event.getJDA();
         Timer timer = new Timer("1");
-        timer.schedule(updateTask, 0, 10000);
+        timer.schedule(updateTask, 0, 60000);
     }
 
     /**
