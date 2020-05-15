@@ -66,9 +66,18 @@ public class ServerStatus extends ListenerAdapter {
             return;
         }
 
-        if(!pingHost("178.63.23.23", 28061, 5000)){
+        if (!pingHost("178.63.23.23", 28061, 5000)) {
             for (TextChannel textChannel : textChannels) {
-                textChannel.sendMessage("Server je momentalne nedostupny.\nPokud je server nedostupny delsi dobu, kontaktujte, prosím, majitele.").queue();
+                String lastMessageId;
+                try {
+                    lastMessageId = textChannel.getHistory().retrievePast(1).complete().get(0).getId();
+                    MessageAction messageAction = textChannel.editMessageById(lastMessageId, "Server je momentalne nedostupny.\nPokud je server nedostupny delsi dobu, kontaktujte, prosím, majitele.");
+                    messageAction.queue();
+                } catch (Exception e) {
+                    System.err.println("server-status: Channel has no messages!");
+                    textChannel.sendMessage("Server je momentalne nedostupny.\nPokud je server nedostupny delsi dobu, kontaktujte, prosím, majitele.").queue();
+                    return;
+                }
             }
             return;
         }
