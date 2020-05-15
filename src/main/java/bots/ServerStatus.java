@@ -84,7 +84,8 @@ public class ServerStatus extends ListenerAdapter {
             Message message = textChannel.getHistory().retrievePast(1).complete().get(0);
 
             String test = "Aktualni stav serveru: " + (mineStat.isServerUp() ? "Online" : "Offline") + "\n" +
-                    "Aktualni pocet hracu: " + mineStat.getCurrentPlayers() + "/" + mineStat.getMaximumPlayers();
+                    "Aktualni pocet hracu: " + mineStat.getCurrentPlayers() + "/" + mineStat.getMaximumPlayers() + "\n" +
+                    "Verze serveru: " + mineStat.getVersion();
 
             if(message==null)
             {
