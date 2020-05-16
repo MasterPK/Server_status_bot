@@ -129,7 +129,12 @@ public class ServerStatus extends ListenerAdapter {
     private TimerTask updateTask = new TimerTask() {
         @Override
         public void run() {
-            updateStatus();
+            try {
+                updateStatus();
+            } catch (Exception e) {
+                System.err.println("Fatal error while updating status!");
+            }
+
         }
     };
 
