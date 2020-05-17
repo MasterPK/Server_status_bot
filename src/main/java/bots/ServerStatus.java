@@ -91,15 +91,12 @@ public class ServerStatus extends ListenerAdapter {
 
 
         for (TextChannel textChannel : textChannels) {
-            String lastMessageId;
+            Message message = null;
             try {
-                lastMessageId = textChannel.getHistory().retrievePast(1).complete().get(0).getId();
+                message = textChannel.getHistory().retrievePast(1).complete().get(0);
             } catch (Exception e) {
                 System.err.println("server-status: Channel has no messages!");
-                return;
             }
-
-            Message message = textChannel.getHistory().retrievePast(1).complete().get(0);
 
             StringBuilder resultMessage = new StringBuilder();
             resultMessage.append("Aktualni stav serveru: ").append(mcServerStats.isOnline() ? "Online" : "Offline").append("\n");
@@ -118,7 +115,7 @@ public class ServerStatus extends ListenerAdapter {
                 textChannel.sendMessage(resultMessage).queue();
                 return;
             }
-            MessageAction messageAction = textChannel.editMessageById(lastMessageId, resultMessage);
+            MessageAction messageAction = textChannel.editMessageById(message.getId(), resultMessage);
             messageAction.queue();
         }
     }
